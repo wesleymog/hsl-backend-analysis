@@ -28,7 +28,12 @@ class CovidExams(Resource):
         cur.execute("SELECT `DE_EXAME` as nome_exame, COUNT(`DE_EXAME`) AS quantidade FROM   EXAMES GROUP  BY DE_EXAME ORDER  BY Count(*) DESC")
         exames = cur.fetchall()
         return {'exames':exames}
-        
+
+class HelloWorld(Resource):
+    def get(self):
+        return {'hello': 'world'}
+
+api.add_resource(HelloWorld, '/')
 api.add_resource(MessageHealth, '/health')
 api.add_resource(CovidExams, '/covid-exams')
 
