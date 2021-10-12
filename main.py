@@ -34,7 +34,7 @@ class ClinicaDesistencia(Resource):
     def get(self):
         cur.execute("SELECT ATENDIMENTO.DE_CLINICA AS clinica, COUNT(DESFECHO.DE_DESFECHO) AS desistencias FROM DESFECHO, ATENDIMENTO WHERE DESFECHO.DE_DESFECHO like 'Desistência do atendimento' AND ATENDIMENTO.ID_DESFECHO = DESFECHO.ID_DESFECHO GROUP BY DE_CLINICA ORDER BY COUNT(DESFECHO.DE_DESFECHO) DESC")
         clinicas = cur.fetchall()
-        return {'clinicas':clinicas}
+        return make_response({'clinicas':clinicas})
         
 class ClinicaAtendimentos(Resource):
     def get(self):
