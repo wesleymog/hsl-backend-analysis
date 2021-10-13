@@ -15,15 +15,8 @@ connection = pymysql.connect(host='remotemysql.com',
                                     cursorclass=pymysql.cursors.DictCursor)
 
 def get_connection(connection):
-    try:
-        cur = connection.cursor()
-    except:
-        connection = pymysql.connect(host='remotemysql.com',
-                                    user='riPOnUyCuK',
-                                    password='m6YJ0faBdk',
-                                    database='riPOnUyCuK',
-                                    cursorclass=pymysql.cursors.DictCursor)
-        cur = connection.cursor()
+    connection.ping()
+    cur = connection.cursor()
     return cur
 #Connection sqlite3
 # conn = sqlite3.connect('hsl_db.sqlite')
