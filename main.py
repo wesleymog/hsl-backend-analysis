@@ -42,6 +42,13 @@ class ExamesPorClinica(Resource):
         cur.execute("SELECT atndmt.DE_CLINICA as clinica, count(DE_EXAME) as quantidade, DE_EXAME AS nome_exame FROM EXAME INNER JOIN EXAME_ATENDIMENTO as exmAtndmt on  EXAME.ID_EXAME = exmAtndmt.ID_EXAME INNER JOIN ATENDIMENTO as atndmt on atndmt.ID_ATENDIMENTO = exmAtndmt.ATENDIMENTO_ID GROUP BY DE_EXAME, atndmt.DE_CLINICA ORDER BY count(DE_EXAME) desc;")
         pacientes = cur.fetchall()
         return make_response({'pacientes':pacientes}) 
+class ExamesPorPaciente(Resource):
+    def get(self, id_paciente):
+        cur = get_connection(connection)
+        cur.execute("SELECT pcnt.ID AS idPaciente, exm.DE_EXAME AS exame FROM EXAME AS exm INNER JOIN EXAME_ATENDIMENTO AS exmAtndm on exmAtndm.ID_EXAME = exm.ID_EXAME LEFT JOIN ATENDIMENTO AS atndm on atndm.ID_ATENDIMENTO = exmAtndm.ATENDIMENTO_ID RIGHT JOIN PACIENTE AS pcnt on pcnt.ID = atndm.ID_PACIENTE WHERE pcnt.ID = {}".format(id_paciente))
+        exames = cur.fetchall()
+        return make_response({'exames':exames})
+
 class ExamesPorPacientesIdosos(Resource):
     def get(self):
         cur = get_connection(connection)
@@ -98,6 +105,11 @@ class DesfechosPorMunicipio(Resource):
 class HelloWorld(Resource):
     def get(self):
         return make_response({'hello': 'world'})
+'''
+
+    ROTAS
+
+'''
 
 api.add_resource(HelloWorld, '/')
 api.add_resource(MessageHealth, '/health')
@@ -105,6 +117,7 @@ api.add_resource(MessageHealth, '/health')
 api.add_resource(Exames, '/exames')
 api.add_resource(ExamesPorClinica, '/exames/clinica')
 api.add_resource(ExamesPorPacientesIdosos, '/exames/paciente_idoso')
+api.add_resource(ExamesPorPaciente, '/exames/paciente/<int:id_paciente>')
 api.add_resource(ExamesPorMunicipio, '/exames/municipio')
 api.add_resource(ExamesPorAVGAnoNasc, '/exames/avg_nasc')
 
