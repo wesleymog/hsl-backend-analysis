@@ -32,7 +32,7 @@ class MessageHealth(Resource):
 class Exames(Resource):
     def get(self):
         cur = get_connection(connection)
-        cur.execute("SELECT `DE_EXAME` as exame, COUNT(`DE_EXAME`) AS quantidade FROM EXAME EXAME GROUP  BY DE_EXAME ORDER  BY Count(*) DESC")
+        cur.execute("SELECT DE_EXAME as exame, COUNT(DE_EXAME) AS quantidade FROM EXAME EXAME GROUP  BY DE_EXAME ORDER  BY Count(*) DESC")
         exames = cur.fetchall()
         return make_response({'exames':exames})
  
