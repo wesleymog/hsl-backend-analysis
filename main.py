@@ -52,7 +52,7 @@ class ExamesPorPaciente(Resource):
 class ExamesPorPacientesIdosos(Resource):
     def get(self):
         cur = get_connection(connection)
-        cur.execute("SELECT exm.DE_EXAME as exame, COUNT(pcnt.ID_PACIENTE) as quantidade, dsfch.DT_DESFECHO FROM ATENDIMENTO INNER JOIN EXAME_ATENDIMENTO AS exmAtnd on ATENDIMENTO.ID_ATENDIMENTO = exmAtnd.ATENDIMENTO_ID INNER JOIN EXAME AS exm on exmAtnd.ID_EXAME = exm.ID_EXAME INNER JOIN PACIENTE AS pcnt on pcnt.ID_PACIENTE = ATENDIMENTO.ID_PACIENTE INNER JOIN DESFECHO AS dsfch on dsfch.ID_DESFECHO = ATENDIMENTO.ID_DESFECHO WHERE pcnt.AA_NASCIMENTO < 1961 GROUP BY exm.DE_EXAME, dsfch.DT_DESFECHO ORDER BY COUNT(exm.DE_EXAME) desc;")
+        cur.execute("SELECT exm.DE_EXAME as exame, COUNT(pcnt.ID_PACIENTE) as quantidade, dsfch.DT_DESFECHO as dia_atendimento FROM ATENDIMENTO INNER JOIN EXAME_ATENDIMENTO AS exmAtnd on ATENDIMENTO.ID_ATENDIMENTO = exmAtnd.ATENDIMENTO_ID INNER JOIN EXAME AS exm on exmAtnd.ID_EXAME = exm.ID_EXAME INNER JOIN PACIENTE AS pcnt on pcnt.ID_PACIENTE = ATENDIMENTO.ID_PACIENTE INNER JOIN DESFECHO AS dsfch on dsfch.ID_DESFECHO = ATENDIMENTO.ID_DESFECHO WHERE pcnt.AA_NASCIMENTO < 1961 GROUP BY exm.DE_EXAME, dsfch.DT_DESFECHO ORDER BY COUNT(exm.DE_EXAME) desc;")
         pacientes = cur.fetchall()
         return make_response({'pacientes':pacientes})
 class ExamesPorMunicipio(Resource):
