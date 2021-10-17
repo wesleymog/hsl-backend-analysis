@@ -102,6 +102,14 @@ class DesfechosPorMunicipio(Resource):
         cur.execute("SELECT desf.DE_DESFECHO AS desfecho,  COUNT(desf.DE_DESFECHO) as quantidades, pcnt.CD_MUNICIPIO as municipio FROM ATENDIMENTO INNER JOIN DESFECHO AS desf on ATENDIMENTO.ID_DESFECHO = desf.ID_DESFECHO INNER JOIN PACIENTE AS pcnt on ATENDIMENTO.ID_PACIENTE = pcnt.ID_PACIENTE GROUP BY desf.DE_DESFECHO, pcnt.CD_MUNICIPIO ORDER BY COUNT(desf.DE_DESFECHO) desc;")
         desfechos = cur.fetchall()
         return make_response({'desfechos':desfechos})
+
+# PACIENTES
+class Pacientes(Resource):
+    def get(self):
+        cur = get_connection(connection)
+        cur.execute("SELECT ID, ID_PACIENTE, CD_MUNICIPIO FROM PACIENTE")
+        pacientes = cur.fetchall()
+        return make_response({'pacientes':pacientes})
 class HelloWorld(Resource):
     def get(self):
         return make_response({'hello': 'world'})
@@ -129,6 +137,9 @@ api.add_resource(ClinicaPorAltasObitos, '/clinicas/altas_obitos')
 #Desfechos
 api.add_resource(Desfechos, '/desfechos')
 api.add_resource(DesfechosPorMunicipio, '/desfechos/municipio')
+
+#Paciente
+api.add_resource(Pacientes, '/pacientes')
 
 
 if __name__ == '__main__':
