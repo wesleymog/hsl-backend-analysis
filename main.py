@@ -65,7 +65,7 @@ class ExamesPorMunicipio(Resource):
 class ExamesPorAVGAnoNasc(Resource):
     def get(self):
         cur = get_connection(connection)
-        cur.execute("SELECT DE_EXAME AS exame, ROUND(cast(AVG(pcnt.AA_NASCIMENTO) as decimal)) AS media_idade FROM EXAME AS exm INNER JOIN EXAME_ATENDIMENTO AS exmAtndmt on exmAtndmt.ID_EXAME = exm.ID_EXAME INNER JOIN ATENDIMENTO AS atdnmt on atdnmt.ID_ATENDIMENTO = exmAtndmt.ATENDIMENTO_ID INNER JOIN PACIENTE as pcnt on pcnt.ID_PACIENTE = atdnmt.ID_PACIENTE GROUP BY DE_EXAME")
+        cur.execute("SELECT DE_EXAME AS exame, cast(ROUND(cast(AVG(pcnt.AA_NASCIMENTO) as decimal)) as CHAR(4)) AS media_idade FROM EXAME AS exm INNER JOIN EXAME_ATENDIMENTO AS exmAtndmt on exmAtndmt.ID_EXAME = exm.ID_EXAME INNER JOIN ATENDIMENTO AS atdnmt on atdnmt.ID_ATENDIMENTO = exmAtndmt.ATENDIMENTO_ID INNER JOIN PACIENTE as pcnt on pcnt.ID_PACIENTE = atdnmt.ID_PACIENTE GROUP BY DE_EXAME")
         exams = cur.fetchall()
         return make_response({'exams':exams})
 #CLINICAS
