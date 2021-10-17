@@ -88,7 +88,7 @@ class ClinicaPorAltasObitos(Resource):
         cur.execute("SELECT DE_CLINICA as clinica, desf.DE_DESFECHO AS desfecho, COUNT(desf.DE_DESFECHO) AS quantidade FROM ATENDIMENTO INNER JOIN DESFECHO AS desf on ATENDIMENTO.ID_DESFECHO = desf.ID_DESFECHO WHERE desf.DE_DESFECHO like 'Alta Administrativa' GROUP BY DE_CLINICA, desf.DE_DESFECHO UNION SELECT DE_CLINICA as clinica,  desf.DE_DESFECHO AS desfecho, COUNT(desf.DE_DESFECHO) AS quantidade FROM ATENDIMENTO INNER JOIN DESFECHO AS desf on ATENDIMENTO.ID_DESFECHO = desf.ID_DESFECHO WHERE desf.DE_DESFECHO like 'Obito%' GROUP BY DE_CLINICA, desf.DE_DESFECHO ORDER BY quantidade DESC;")
         clinicas = cur.fetchall()
         return make_response({'clinicas':clinicas})
-
+# DESFECHOS
 class Desfechos(Resource):
     def get(self):
         cur = get_connection(connection)
@@ -103,6 +103,13 @@ class DesfechosPorMunicipio(Resource):
         desfechos = cur.fetchall()
         return make_response({'desfechos':desfechos})
 
+class DesfechosPorIdade(Resource):
+    def get(self):
+        cur = get_connection(connection)
+        cur.execute("SELECT S.DESFECHO as desfecho, 2021-S.AA_NASCIMENTO as idade, COUNT(S.DESFECHO) as quantidade FROM (SELECT ID_CLINICA, DT_ATENDIMENTO, desf.DE_DESFECHO AS DESFECHO, PACIENTE.ID_PACIENTE, PACIENTE.AA_NASCIMENTO FROM ATENDIMENTO INNER JOIN PACIENTE on ATENDIMENTO.ID_PACIENTE = PACIENTE.ID_PACIENTE and PACIENTE.AA_NASCIMENTO != 'YYYY' INNER JOIN DESFECHO AS desf on ATENDIMENTO.ID_DESFECHO = desf.ID_DESFECHO WHERE DE_DESFECHO like 'Alta Administrativa' or DE_DESFECHO like 'Obito%' ORDER BY ID_CLINICA ASC) AS S GROUP BY S.DESFECHO,S.AA_NASCIMENTO ORDER BY quantidade DESC")
+        desfechos = cur.fetchall()
+        return make_response({'desfechos':desfechos})
+
 # PACIENTES
 class Pacientes(Resource):
     def get(self):
@@ -110,6 +117,9 @@ class Pacientes(Resource):
         cur.execute("SELECT ID, ID_PACIENTE, CD_MUNICIPIO FROM PACIENTE")
         pacientes = cur.fetchall()
         return make_response({'pacientes':pacientes})
+
+
+
 class HelloWorld(Resource):
     def get(self):
         return make_response({'hello': 'world'})
@@ -137,6 +147,7 @@ api.add_resource(ClinicaPorAltasObitos, '/clinicas/altas_obitos')
 #Desfechos
 api.add_resource(Desfechos, '/desfechos')
 api.add_resource(DesfechosPorMunicipio, '/desfechos/municipio')
+api.add_resource(DesfechosPorIdade, '/desfechos/idade')
 
 #Paciente
 api.add_resource(Pacientes, '/pacientes')
