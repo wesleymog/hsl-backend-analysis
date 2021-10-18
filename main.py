@@ -41,6 +41,26 @@ def get_dataset(data, coluna, linha, valor):
                     d['data'][labels.index(info[coluna])]=info[valor]
     return {"labels": labels, "datasets":data_set}
 
+def get_datasets_limit(data, coluna, linha, valor):
+    labels =[]
+    data_set = []
+    for info in data:
+        if info[coluna] not in labels and len(labels) < 4:
+            labels.append(info[coluna])
+    for info in data:
+        if not any(d['label'] == info[linha] for d in data_set):
+            if len(data_set) < 12:
+                dict_ ={}
+                dict_['label'] = info[linha]
+                dict_['data'] = [0 for _ in range(len(labels))]
+                dict_['data'][labels.index(info[coluna])]=info[valor]
+                data_set.append(dict_)
+        else:
+            for d in data_set:
+                if d['label'] == info[linha]:
+                    d['data'][labels.index(info[coluna])]=info[valor]
+    return {"labels": labels, "datasets":data_set}
+
 class MessageHealth(Resource):
 
     def get(self):
@@ -108,7 +128,7 @@ class ClinicaPorAltasObitos(Resource):
         cur = get_connection(connection)
         cur.execute("SELECT DE_CLINICA as clinica, desf.DE_DESFECHO AS desfecho, COUNT(desf.DE_DESFECHO) AS quantidade FROM ATENDIMENTO INNER JOIN DESFECHO AS desf on ATENDIMENTO.ID_DESFECHO = desf.ID_DESFECHO WHERE desf.DE_DESFECHO like 'Alta Administrativa' GROUP BY DE_CLINICA, desf.DE_DESFECHO UNION SELECT DE_CLINICA as clinica,  desf.DE_DESFECHO AS desfecho, COUNT(desf.DE_DESFECHO) AS quantidade FROM ATENDIMENTO INNER JOIN DESFECHO AS desf on ATENDIMENTO.ID_DESFECHO = desf.ID_DESFECHO WHERE desf.DE_DESFECHO like 'Obito%' GROUP BY DE_CLINICA, desf.DE_DESFECHO ORDER BY quantidade DESC;")
         clinicas = cur.fetchall()
-        info = get_dataset(clinicas, 'desfecho', 'clinica', 'quantidade')
+        info = get_datasets_limit(clinicas, 'desfecho', 'clinica', 'quantidade')
         return make_response({'graphics':info, 'clinicas':clinicas}) 
 # DESFECHOS
 class Desfechos(Resource):
@@ -131,7 +151,7 @@ class DesfechosPorIdade(Resource):
         cur = get_connection(connection)
         cur.execute("SELECT S.DESFECHO as desfecho, 2021-S.AA_NASCIMENTO as idade, COUNT(S.DESFECHO) as quantidade FROM (SELECT ID_CLINICA, DT_ATENDIMENTO, desf.DE_DESFECHO AS DESFECHO, PACIENTE.ID_PACIENTE, PACIENTE.AA_NASCIMENTO FROM ATENDIMENTO INNER JOIN PACIENTE on ATENDIMENTO.ID_PACIENTE = PACIENTE.ID_PACIENTE and PACIENTE.AA_NASCIMENTO != 'YYYY' INNER JOIN DESFECHO AS desf on ATENDIMENTO.ID_DESFECHO = desf.ID_DESFECHO WHERE DE_DESFECHO like 'Alta Administrativa' or DE_DESFECHO like 'Obito%' ORDER BY ID_CLINICA ASC) AS S GROUP BY S.DESFECHO,S.AA_NASCIMENTO ORDER BY quantidade DESC")
         desfechos = cur.fetchall()
-        info = get_dataset(desfechos, 'desfecho', 'idade', 'quantidade')
+        info = get_datasets_limit(desfechos, 'desfecho', 'idade', 'quantidade')
         return make_response({'graphics':info, 'desfechos':desfechos}) 
 
 # PACIENTES
