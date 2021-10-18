@@ -72,14 +72,16 @@ class ExamesPorPacientesIdosos(Resource):
     def get(self):
         cur = get_connection(connection)
         cur.execute("SELECT exm.DE_EXAME as exame, COUNT(pcnt.ID_PACIENTE) as quantidade, dsfch.DT_DESFECHO as dia_atendimento FROM ATENDIMENTO INNER JOIN EXAME_ATENDIMENTO AS exmAtnd on ATENDIMENTO.ID_ATENDIMENTO = exmAtnd.ATENDIMENTO_ID INNER JOIN EXAME AS exm on exmAtnd.ID_EXAME = exm.ID_EXAME INNER JOIN PACIENTE AS pcnt on pcnt.ID_PACIENTE = ATENDIMENTO.ID_PACIENTE INNER JOIN DESFECHO AS dsfch on dsfch.ID_DESFECHO = ATENDIMENTO.ID_DESFECHO WHERE pcnt.AA_NASCIMENTO < 1961 GROUP BY exm.DE_EXAME, dsfch.DT_DESFECHO ORDER BY COUNT(exm.DE_EXAME) desc;")
-        pacientes = cur.fetchall()
-        return make_response({'pacientes':pacientes})
+        exames = cur.fetchall()
+        info = get_dataset(exames[:10], 'exame', 'dia_atendimento', 'quantidade')
+        return make_response({'graphics':info, 'exames':exames}) 
 class ExamesPorMunicipio(Resource):
     def get(self):
         cur = get_connection(connection)
         cur.execute("SELECT exm.DE_EXAME as exame, COUNT(exm.DE_EXAME) as quantidade, pcnt.CD_MUNICIPIO as municipio FROM ATENDIMENTO INNER JOIN EXAME_ATENDIMENTO AS exmAtnd on ATENDIMENTO.ID_ATENDIMENTO = exmAtnd.ATENDIMENTO_ID INNER JOIN EXAME AS exm on exmAtnd.ID_EXAME = exm.ID_EXAME INNER JOIN PACIENTE AS pcnt on pcnt.ID_PACIENTE = ATENDIMENTO.ID_PACIENTE GROUP BY exm.DE_EXAME, pcnt.CD_MUNICIPIO ORDER BY COUNT(exm.DE_EXAME) desc;")
         exams = cur.fetchall()
-        return make_response({'exames':exams})
+        info = get_dataset(exams[:10], 'exame', 'municipio', 'quantidade')
+        return make_response({'graphics':info, 'exames':exams}) 
 
 class ExamesPorAVGAnoNasc(Resource):
     def get(self):
@@ -106,7 +108,8 @@ class ClinicaPorAltasObitos(Resource):
         cur = get_connection(connection)
         cur.execute("SELECT DE_CLINICA as clinica, desf.DE_DESFECHO AS desfecho, COUNT(desf.DE_DESFECHO) AS quantidade FROM ATENDIMENTO INNER JOIN DESFECHO AS desf on ATENDIMENTO.ID_DESFECHO = desf.ID_DESFECHO WHERE desf.DE_DESFECHO like 'Alta Administrativa' GROUP BY DE_CLINICA, desf.DE_DESFECHO UNION SELECT DE_CLINICA as clinica,  desf.DE_DESFECHO AS desfecho, COUNT(desf.DE_DESFECHO) AS quantidade FROM ATENDIMENTO INNER JOIN DESFECHO AS desf on ATENDIMENTO.ID_DESFECHO = desf.ID_DESFECHO WHERE desf.DE_DESFECHO like 'Obito%' GROUP BY DE_CLINICA, desf.DE_DESFECHO ORDER BY quantidade DESC;")
         clinicas = cur.fetchall()
-        return make_response({'clinicas':clinicas})
+        info = get_dataset(clinicas, 'desfecho', 'clinica', 'quantidade')
+        return make_response({'graphics':info, 'clinicas':clinicas}) 
 # DESFECHOS
 class Desfechos(Resource):
     def get(self):
@@ -120,14 +123,16 @@ class DesfechosPorMunicipio(Resource):
         cur = get_connection(connection)
         cur.execute("SELECT desf.DE_DESFECHO AS desfecho,  COUNT(desf.DE_DESFECHO) as quantidades, pcnt.CD_MUNICIPIO as municipio FROM ATENDIMENTO INNER JOIN DESFECHO AS desf on ATENDIMENTO.ID_DESFECHO = desf.ID_DESFECHO INNER JOIN PACIENTE AS pcnt on ATENDIMENTO.ID_PACIENTE = pcnt.ID_PACIENTE GROUP BY desf.DE_DESFECHO, pcnt.CD_MUNICIPIO ORDER BY COUNT(desf.DE_DESFECHO) desc;")
         desfechos = cur.fetchall()
-        return make_response({'desfechos':desfechos})
+        info = get_dataset(desfechos[:10], 'desfecho', 'municipio', 'quantidades')
+        return make_response({'graphics':info, 'desfechos':desfechos}) 
 
 class DesfechosPorIdade(Resource):
     def get(self):
         cur = get_connection(connection)
         cur.execute("SELECT S.DESFECHO as desfecho, 2021-S.AA_NASCIMENTO as idade, COUNT(S.DESFECHO) as quantidade FROM (SELECT ID_CLINICA, DT_ATENDIMENTO, desf.DE_DESFECHO AS DESFECHO, PACIENTE.ID_PACIENTE, PACIENTE.AA_NASCIMENTO FROM ATENDIMENTO INNER JOIN PACIENTE on ATENDIMENTO.ID_PACIENTE = PACIENTE.ID_PACIENTE and PACIENTE.AA_NASCIMENTO != 'YYYY' INNER JOIN DESFECHO AS desf on ATENDIMENTO.ID_DESFECHO = desf.ID_DESFECHO WHERE DE_DESFECHO like 'Alta Administrativa' or DE_DESFECHO like 'Obito%' ORDER BY ID_CLINICA ASC) AS S GROUP BY S.DESFECHO,S.AA_NASCIMENTO ORDER BY quantidade DESC")
         desfechos = cur.fetchall()
-        return make_response({'desfechos':desfechos})
+        info = get_dataset(desfechos, 'desfecho', 'idade', 'quantidade')
+        return make_response({'graphics':info, 'desfechos':desfechos}) 
 
 # PACIENTES
 class Pacientes(Resource):
