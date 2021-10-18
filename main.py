@@ -39,7 +39,7 @@ def get_dataset(data, coluna, linha, valor):
             for d in data_set:
                 if d['label'] == info[linha]:
                     d['data'][labels.index(info[coluna])]=info[valor]
-    return {"labels": labels, "data_set":data_set}
+    return {"labels": labels, "datasets":data_set}
 
 class MessageHealth(Resource):
 
