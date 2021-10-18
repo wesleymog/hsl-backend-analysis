@@ -23,7 +23,7 @@ def get_connection(connection):
 # conn = sqlite3.connect('hsl_db.sqlite')
 # cur = conn.cursor()
 
-def get_dataset(data, coluna, linha, valor):
+def get_datasets(data, coluna, linha, valor):
     labels =[]
     data_set = []
     for info in data:
@@ -66,6 +66,18 @@ def get_datasets_limit(data, coluna, linha, valor):
                     d['data'][labels.index(info[coluna])]=info[valor]
     return {"labels": labels, "datasets":data_set}
 
+def get_dataset(data_info, coluna, valor):
+    labels =[]
+    data = []
+    background_colors = []
+    print(data)
+    for info in data_info:
+        if info[coluna] not in labels:
+            labels.append(info[coluna])
+            data.append(info[valor])
+            background_colors.append("#"+''.join([random.choice('ABCDEF0123456789') for i in range(6)]))
+    data_sets = [{"data":data, "backgroundColor":background_colors}]
+    return {"labels": labels, "datasets":data_sets}    
 class MessageHealth(Resource):
 
     def get(self):
@@ -84,7 +96,7 @@ class ExamesPorClinica(Resource):
         cur = get_connection(connection)
         cur.execute("SELECT atndmt.DE_CLINICA as clinica, count(DE_EXAME) as quantidade, DE_EXAME AS nome_exame FROM EXAME INNER JOIN EXAME_ATENDIMENTO as exmAtndmt on  EXAME.ID_EXAME = exmAtndmt.ID_EXAME INNER JOIN ATENDIMENTO as atndmt on atndmt.ID_ATENDIMENTO = exmAtndmt.ATENDIMENTO_ID GROUP BY DE_EXAME, atndmt.DE_CLINICA ORDER BY count(DE_EXAME) desc;")
         clinicas = cur.fetchall()
-        info = get_dataset(clinicas[:10], 'clinica', 'nome_exame', 'quantidade')
+        info = get_datasets(clinicas[:10], 'clinica', 'nome_exame', 'quantidade')
         return make_response({'graphics':info, 'clinicas':clinicas}) 
 class ExamesPorPaciente(Resource):
     def get(self, id_paciente):
@@ -98,14 +110,14 @@ class ExamesPorPacientesIdosos(Resource):
         cur = get_connection(connection)
         cur.execute("SELECT exm.DE_EXAME as exame, COUNT(pcnt.ID_PACIENTE) as quantidade, dsfch.DT_DESFECHO as dia_atendimento FROM ATENDIMENTO INNER JOIN EXAME_ATENDIMENTO AS exmAtnd on ATENDIMENTO.ID_ATENDIMENTO = exmAtnd.ATENDIMENTO_ID INNER JOIN EXAME AS exm on exmAtnd.ID_EXAME = exm.ID_EXAME INNER JOIN PACIENTE AS pcnt on pcnt.ID_PACIENTE = ATENDIMENTO.ID_PACIENTE INNER JOIN DESFECHO AS dsfch on dsfch.ID_DESFECHO = ATENDIMENTO.ID_DESFECHO WHERE pcnt.AA_NASCIMENTO < 1961 GROUP BY exm.DE_EXAME, dsfch.DT_DESFECHO ORDER BY COUNT(exm.DE_EXAME) desc;")
         exames = cur.fetchall()
-        info = get_dataset(exames[:10], 'exame', 'dia_atendimento', 'quantidade')
+        info = get_datasets(exames[:10], 'exame', 'dia_atendimento', 'quantidade')
         return make_response({'graphics':info, 'exames':exames}) 
 class ExamesPorMunicipio(Resource):
     def get(self):
         cur = get_connection(connection)
         cur.execute("SELECT exm.DE_EXAME as exame, COUNT(exm.DE_EXAME) as quantidade, pcnt.CD_MUNICIPIO as municipio FROM ATENDIMENTO INNER JOIN EXAME_ATENDIMENTO AS exmAtnd on ATENDIMENTO.ID_ATENDIMENTO = exmAtnd.ATENDIMENTO_ID INNER JOIN EXAME AS exm on exmAtnd.ID_EXAME = exm.ID_EXAME INNER JOIN PACIENTE AS pcnt on pcnt.ID_PACIENTE = ATENDIMENTO.ID_PACIENTE GROUP BY exm.DE_EXAME, pcnt.CD_MUNICIPIO ORDER BY COUNT(exm.DE_EXAME) desc;")
         exams = cur.fetchall()
-        info = get_dataset(exams[:10], 'exame', 'municipio', 'quantidade')
+        info = get_datasets(exams[:10], 'exame', 'municipio', 'quantidade')
         return make_response({'graphics':info, 'exames':exams}) 
 
 class ExamesPorAVGAnoNasc(Resource):
@@ -141,14 +153,15 @@ class Desfechos(Resource):
         cur = get_connection(connection)
         cur.execute("SELECT DE_DESFECHO as desfecho ,count(DE_DESFECHO) as quantidade FROM DESFECHO GROUP BY DE_DESFECHO ORDER BY count(DE_DESFECHO) DESC;")
         desfechos = cur.fetchall()
-        return make_response({'desfechos':desfechos})
+        graphics = get_dataset(desfechos, "desfecho", "quantidade")
+        return make_response({'desfechos':desfechos, "graphics":graphics})
 
 class DesfechosPorMunicipio(Resource):
     def get(self):
         cur = get_connection(connection)
         cur.execute("SELECT desf.DE_DESFECHO AS desfecho,  COUNT(desf.DE_DESFECHO) as quantidades, pcnt.CD_MUNICIPIO as municipio FROM ATENDIMENTO INNER JOIN DESFECHO AS desf on ATENDIMENTO.ID_DESFECHO = desf.ID_DESFECHO INNER JOIN PACIENTE AS pcnt on ATENDIMENTO.ID_PACIENTE = pcnt.ID_PACIENTE GROUP BY desf.DE_DESFECHO, pcnt.CD_MUNICIPIO ORDER BY COUNT(desf.DE_DESFECHO) desc;")
         desfechos = cur.fetchall()
-        info = get_dataset(desfechos[:10], 'desfecho', 'municipio', 'quantidades')
+        info = get_datasets(desfechos[:10], 'desfecho', 'municipio', 'quantidades')
         return make_response({'graphics':info, 'desfechos':desfechos}) 
 
 class DesfechosPorIdade(Resource):
