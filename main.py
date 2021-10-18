@@ -42,7 +42,7 @@ def get_dataset(data, coluna, linha, valor):
             for d in data_set:
                 if d['label'] == info[linha]:
                     d['data'][labels.index(info[coluna])]=info[valor]
-    return {"labels": labels, "datasets":data_set}
+    return {"labels": labels,  "backgroundColor":background_colors,"datasets":data_set}
 
 def get_datasets_limit(data, coluna, linha, valor):
     labels =[]
@@ -64,7 +64,7 @@ def get_datasets_limit(data, coluna, linha, valor):
             for d in data_set:
                 if d['label'] == info[linha]:
                     d['data'][labels.index(info[coluna])]=info[valor]
-    return {"labels": labels, "datasets":data_set}
+    return {"labels": labels, "backgroundColor":background_colors, "datasets":data_set}
 
 class MessageHealth(Resource):
 
