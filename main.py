@@ -22,6 +22,24 @@ def get_connection(connection):
 # conn = sqlite3.connect('hsl_db.sqlite')
 # cur = conn.cursor()
 
+def get_dataset(data, coluna, linha, valor):
+    labels =[]
+    data_set = []
+    for info in data:
+        if info[coluna] not in labels:
+            labels.append(info[coluna])
+    for info in data:
+        if not any(d['label'] == info[linha] for d in data_set):
+            dict_ ={}
+            dict_['label'] = info[linha]
+            dict_['data'] = [0 for _ in range(len(labels))]
+            dict_['data'][labels.index(info[coluna])]=info[valor]
+            data_set.append(dict_)
+        else:
+            for d in data_set:
+                if d['label'] == info[linha]:
+                    d['data'][labels.index(info[coluna])]=info[valor]
+    return {"labels": labels, "data_set":data_set}
 
 class MessageHealth(Resource):
 
@@ -40,8 +58,9 @@ class ExamesPorClinica(Resource):
     def get(self):
         cur = get_connection(connection)
         cur.execute("SELECT atndmt.DE_CLINICA as clinica, count(DE_EXAME) as quantidade, DE_EXAME AS nome_exame FROM EXAME INNER JOIN EXAME_ATENDIMENTO as exmAtndmt on  EXAME.ID_EXAME = exmAtndmt.ID_EXAME INNER JOIN ATENDIMENTO as atndmt on atndmt.ID_ATENDIMENTO = exmAtndmt.ATENDIMENTO_ID GROUP BY DE_EXAME, atndmt.DE_CLINICA ORDER BY count(DE_EXAME) desc;")
-        pacientes = cur.fetchall()
-        return make_response({'pacientes':pacientes}) 
+        clinicas = cur.fetchall()
+        info = get_dataset(clinicas, 'clinica', 'nome_exame', 'quantidade')
+        return make_response(info) 
 class ExamesPorPaciente(Resource):
     def get(self, id_paciente):
         cur = get_connection(connection)
