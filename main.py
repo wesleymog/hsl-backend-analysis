@@ -29,20 +29,20 @@ def get_dataset(data, coluna, linha, valor):
     for info in data:
         if info[coluna] not in labels:
             labels.append(info[coluna])
-    background_colors = ["#"+''.join([random.choice('ABCDEF0123456789') for i in range(6)]) for _ in labels]
     for info in data:
         if not any(d['label'] == info[linha] for d in data_set):
             dict_ ={}
             dict_['label'] = info[linha]
             dict_['data'] = [0 for _ in range(len(labels))]
             dict_['data'][labels.index(info[coluna])]=info[valor]
-            dict_['backgroundColor']=background_colors
+            color = "#"+''.join([random.choice('ABCDEF0123456789') for i in range(6)])
+            dict_['backgroundColor']=[color for _ in labels]
             data_set.append(dict_)
         else:
             for d in data_set:
                 if d['label'] == info[linha]:
                     d['data'][labels.index(info[coluna])]=info[valor]
-    return {"labels": labels,  "backgroundColor":background_colors,"datasets":data_set}
+    return {"labels": labels,"datasets":data_set}
 
 def get_datasets_limit(data, coluna, linha, valor):
     labels =[]
@@ -50,7 +50,6 @@ def get_datasets_limit(data, coluna, linha, valor):
     for info in data:
         if info[coluna] not in labels and len(labels) < 4:
             labels.append(info[coluna])
-    background_colors = ["#"+''.join([random.choice('ABCDEF0123456789') for i in range(6)]) for _ in labels]
     for info in data:
         if not any(d['label'] == info[linha] for d in data_set):
             if len(data_set) < 12:
@@ -58,13 +57,14 @@ def get_datasets_limit(data, coluna, linha, valor):
                 dict_['label'] = info[linha]
                 dict_['data'] = [0 for _ in range(len(labels))]
                 dict_['data'][labels.index(info[coluna])]=info[valor]
-                dict_['backgroundColor']=background_colors
+                color = "#"+''.join([random.choice('ABCDEF0123456789') for i in range(6)])
+                dict_['backgroundColor']=[color for _ in labels]
                 data_set.append(dict_)
         else:
             for d in data_set:
                 if d['label'] == info[linha]:
                     d['data'][labels.index(info[coluna])]=info[valor]
-    return {"labels": labels, "backgroundColor":background_colors, "datasets":data_set}
+    return {"labels": labels, "datasets":data_set}
 
 class MessageHealth(Resource):
 
