@@ -59,8 +59,8 @@ class ExamesPorClinica(Resource):
         cur = get_connection(connection)
         cur.execute("SELECT atndmt.DE_CLINICA as clinica, count(DE_EXAME) as quantidade, DE_EXAME AS nome_exame FROM EXAME INNER JOIN EXAME_ATENDIMENTO as exmAtndmt on  EXAME.ID_EXAME = exmAtndmt.ID_EXAME INNER JOIN ATENDIMENTO as atndmt on atndmt.ID_ATENDIMENTO = exmAtndmt.ATENDIMENTO_ID GROUP BY DE_EXAME, atndmt.DE_CLINICA ORDER BY count(DE_EXAME) desc;")
         clinicas = cur.fetchall()
-        info = get_dataset(clinicas, 'clinica', 'nome_exame', 'quantidade')
-        return make_response(info) 
+        info = get_dataset(clinicas[:10], 'clinica', 'nome_exame', 'quantidade')
+        return make_response({'graphics':info, 'clinicas':clinicas}) 
 class ExamesPorPaciente(Resource):
     def get(self, id_paciente):
         cur = get_connection(connection)
