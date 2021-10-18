@@ -36,7 +36,7 @@ def get_dataset(data, coluna, linha, valor):
             dict_['label'] = info[linha]
             dict_['data'] = [0 for _ in range(len(labels))]
             dict_['data'][labels.index(info[coluna])]=info[valor]
-            dict_['backgroundColor'][labels.index(info[coluna])]=background_colors
+            dict_['backgroundColor']=background_colors
             data_set.append(dict_)
         else:
             for d in data_set:
@@ -58,7 +58,7 @@ def get_datasets_limit(data, coluna, linha, valor):
                 dict_['label'] = info[linha]
                 dict_['data'] = [0 for _ in range(len(labels))]
                 dict_['data'][labels.index(info[coluna])]=info[valor]
-                dict_['backgroundColor'][labels.index(info[coluna])]=background_colors
+                dict_['backgroundColor']=background_colors
                 data_set.append(dict_)
         else:
             for d in data_set:
